@@ -317,6 +317,14 @@ static mlir::LogicalResult verify(MatMulOp op) {
   return mlir::success();
 }
 
+/// Infer the output shape of the MatMulOp, this is required by the shape
+/// inference interface.
+void MatMulOp::inferShapes() {
+  auto lhsType = getOperand(0).getType().cast<RankedTensorType>();
+  auto rhsType = getOperand(1).getType().cast<RankedTensorType>();
+  SmallVector<int64_t, 2> dims {lhsType.getShape()[0], rhsType.getShape()[1]};
+  getResult().setType(RankedTensorType::get(dims, lhsType.getElementType()));
+}
 
 //===----------------------------------------------------------------------===//
 // ReturnOp

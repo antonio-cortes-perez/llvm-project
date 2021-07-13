@@ -182,7 +182,7 @@ def MulOp : Toy_Op<"mul",
 }
 
 def MatMulOp : Toy_Op<"matmul",
-    [NoSideEffect]> {
+    [NoSideEffect, DeclareOpInterfaceMethods<ShapeInferenceOpInterface>]> {
   let summary = "matrix multiplication operation";
   let description = [{
     The "matmul" operation performs matrix multiplication between two
