@@ -291,6 +291,32 @@ void MatMulOp::build(mlir::OpBuilder &builder, mlir::OperationState &state,
   state.addOperands({lhs, rhs});
 }
 
+static mlir::LogicalResult verify(MatMulOp op) {
+  auto lhsType = op.getOperand(0).getType().dyn_cast<RankedTensorType>();
+  auto rhsType = op.getOperand(1).getType().dyn_cast<RankedTensorType>();
+  if (!lhsType || !rhsType)
+    return mlir::success();
+
+  auto lhsShape = lhsType.getShape();
+  auto rhsShape = rhsType.getShape();
+  if (lhsShape.size() != 2 || rhsShape.size() != 2)
+    return op.emitError() << "matmul only supports matrices of 2 dimensions";
+  if (lhsShape[1] != rhsShape[0])
+    return op.emitError() << "matmul inner dimensions should match.";
+
+  auto resultType = op.getType().dyn_cast<RankedTensorType>();
+  if (!resultType)
+    return mlir::success();
+
+  auto resultShape = resultType.getShape();
+  if (resultShape.size() != 2)
+    return op.emitError() << "matmul output should have 2 dimensions";
+  if (lhsShape[0] != resultShape[0] || rhsShape[1] != resultShape[1])
+    return op.emitError() << "matmul with wrong output dimensions.";
+
+  return mlir::success();
+}
+
 
 //===----------------------------------------------------------------------===//
 // ReturnOp

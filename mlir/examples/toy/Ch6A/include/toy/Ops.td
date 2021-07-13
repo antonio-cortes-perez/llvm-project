@@ -197,11 +197,13 @@ def MatMulOp : Toy_Op<"matmul",
     $lhs `,` $rhs attr-dict `:` `(` type($lhs) `,` type($rhs) `)`  `->` type(results)
   }];
 
-
   // Allow building a MulOp with from the two input operands.
   let builders = [
     OpBuilder<(ins "Value":$lhs, "Value":$rhs)>
   ];
+
+  // Invoke a static verify method to verify this matmul operation.
+  let verifier = [{ return ::verify(*this); }];
 }
 
 def PrintOp : Toy_Op<"print"> {
