@@ -181,6 +181,29 @@ def MulOp : Toy_Op<"mul",
   ];
 }
 
+def MatMulOp : Toy_Op<"matmul",
+    [NoSideEffect]> {
+  let summary = "matrix multiplication operation";
+  let description = [{
+    The "matmul" operation performs matrix multiplication between two
+    tensors. The shapes of the tensor operands are expected to match.
+  }];
+
+  let arguments = (ins F64Tensor:$lhs, F64Tensor:$rhs);
+  let results = (outs F64Tensor);
+
+  // Specify a parser and printer method.
+  let assemblyFormat = [{
+    $lhs `,` $rhs attr-dict `:` `(` type($lhs) `,` type($rhs) `)`  `->` type(results)
+  }];
+
+
+  // Allow building a MulOp with from the two input operands.
+  let builders = [
+    OpBuilder<(ins "Value":$lhs, "Value":$rhs)>
+  ];
+}
+
 def PrintOp : Toy_Op<"print"> {
   let summary = "print operation";
   let description = [{

@@ -283,6 +283,16 @@ void MulOp::build(mlir::OpBuilder &builder, mlir::OperationState &state,
 void MulOp::inferShapes() { getResult().setType(getOperand(0).getType()); }
 
 //===----------------------------------------------------------------------===//
+// MatMulOp
+
+void MatMulOp::build(mlir::OpBuilder &builder, mlir::OperationState &state,
+                     mlir::Value lhs, mlir::Value rhs) {
+  state.addTypes(UnrankedTensorType::get(builder.getF64Type()));
+  state.addOperands({lhs, rhs});
+}
+
+
+//===----------------------------------------------------------------------===//
 // ReturnOp
 
 static mlir::LogicalResult verify(ReturnOp op) {
