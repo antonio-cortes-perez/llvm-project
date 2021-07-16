@@ -1,0 +1,22 @@
+# RUN: toyc-ch6a %s -emit=mlir-affine 2>&1 | FileCheck %s
+
+def main() {
+  var a<3, 4> = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+  var b<4, 2> = [1, 2, 3, 4, 5, 6, 7, 8];
+  var c = matmul(a, b);
+  print(c);
+}
+
+# CHECK-LABEL: func @main()
+# CHECK-DAG:     [[A:%.*]] = memref.alloc() : memref<3x4xf64>
+# CHECK-DAG:     [[B:%.*]] = memref.alloc() : memref<4x2xf64>
+# CHECK-DAG:     [[C:%.*]] = memref.alloc() : memref<3x2xf64>
+# CHECK:         affine.for [[ROW:%.*]] = 0 to 3
+# CHECK-NEXT:      affine.for [[COL:%.*]] = 0 to 2
+# CHECK-NEXT:        affine.for [[IDX:%.*]] = 0 to 4
+# CHECK-NEXT:          [[A_ELEM:%.*]] = affine.load [[A]]{{\[}}[[ROW]], [[IDX]]] : memref<3x4xf64>
+# CHECK-NEXT:          [[B_ELEM:%.*]] = affine.load [[B]]{{\[}}[[IDX]], [[COL]]] : memref<4x2xf64>
+# CHECK-NEXT:          [[MUL:%.*]] = mulf [[A_ELEM]], [[B_ELEM]] : f64
+# CHECK-NEXT:          [[B_ELEM:%.*]] = affine.load [[C]]{{\[}}[[ROW]], [[COL]]] : memref<3x2xf64>
+# CHECK-NEXT:          [[ACC:%.*]] = addf [[B_ELEM]], [[MUL]] : f64
+# CHECK-NEXT:          affine.store [[ACC]], [[C]]{{\[}}[[ROW]], [[COL]]] : memref<3x2xf64>
