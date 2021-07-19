@@ -1,4 +1,5 @@
-# RUN: toyc-ch6a %s -emit=mlir-affine 2>&1 | FileCheck %s
+# RUN: toyc-ch6a %s -emit=mlir-affine 2>&1 | FileCheck %s -check-prefix=GEN
+# RUN: toyc-ch6a %s -emit=jit 2>&1 | FileCheck %s -check-prefix=JIT
 
 def main() {
   var a<3, 4> = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
@@ -7,16 +8,20 @@ def main() {
   print(c);
 }
 
-# CHECK-LABEL: func @main()
-# CHECK-DAG:     [[A:%.*]] = memref.alloc() : memref<3x4xf64>
-# CHECK-DAG:     [[B:%.*]] = memref.alloc() : memref<4x2xf64>
-# CHECK-DAG:     [[C:%.*]] = memref.alloc() : memref<3x2xf64>
-# CHECK:         affine.for [[ROW:%.*]] = 0 to 3
-# CHECK-NEXT:      affine.for [[COL:%.*]] = 0 to 2
-# CHECK-NEXT:        affine.for [[IDX:%.*]] = 0 to 4
-# CHECK-NEXT:          [[A_ELEM:%.*]] = affine.load [[A]]{{\[}}[[ROW]], [[IDX]]] : memref<3x4xf64>
-# CHECK-NEXT:          [[B_ELEM:%.*]] = affine.load [[B]]{{\[}}[[IDX]], [[COL]]] : memref<4x2xf64>
-# CHECK-NEXT:          [[MUL:%.*]] = mulf [[A_ELEM]], [[B_ELEM]] : f64
-# CHECK-NEXT:          [[B_ELEM:%.*]] = affine.load [[C]]{{\[}}[[ROW]], [[COL]]] : memref<3x2xf64>
-# CHECK-NEXT:          [[ACC:%.*]] = addf [[B_ELEM]], [[MUL]] : f64
-# CHECK-NEXT:          affine.store [[ACC]], [[C]]{{\[}}[[ROW]], [[COL]]] : memref<3x2xf64>
+# GEN-LABEL: func @main()
+# GEN-DAG:     [[A:%.*]] = memref.alloc() : memref<3x4xf64>
+# GEN-DAG:     [[B:%.*]] = memref.alloc() : memref<4x2xf64>
+# GEN-DAG:     [[C:%.*]] = memref.alloc() : memref<3x2xf64>
+# GEN:         affine.for [[ROW:%.*]] = 0 to 3
+# GEN-NEXT:      affine.for [[COL:%.*]] = 0 to 2
+# GEN-NEXT:        affine.for [[IDX:%.*]] = 0 to 4
+# GEN-NEXT:          [[A_ELEM:%.*]] = affine.load [[A]]{{\[}}[[ROW]], [[IDX]]] : memref<3x4xf64>
+# GEN-NEXT:          [[B_ELEM:%.*]] = affine.load [[B]]{{\[}}[[IDX]], [[COL]]] : memref<4x2xf64>
+# GEN-NEXT:          [[MUL:%.*]] = mulf [[A_ELEM]], [[B_ELEM]] : f64
+# GEN-NEXT:          [[B_ELEM:%.*]] = affine.load [[C]]{{\[}}[[ROW]], [[COL]]] : memref<3x2xf64>
+# GEN-NEXT:          [[ACC:%.*]] = addf [[B_ELEM]], [[MUL]] : f64
+# GEN-NEXT:          affine.store [[ACC]], [[C]]{{\[}}[[ROW]], [[COL]]] : memref<3x2xf64>
+
+# JIT:        50.{{0+}}	 60.{{0+}}
+# JIT-NEXT:  114.{{0+}} 140.{{0+}}
+# JIT-NEXT:  178.{{0+}} 220.{{0+}}
