@@ -9,11 +9,13 @@ def main() {
 }
 
 # GEN-LABEL: func @main()
+# GEN-DAG:     [[ZERO:%.*]] = constant 0.{{0+}}e+00 : f64
 # GEN-DAG:     [[A:%.*]] = memref.alloc() : memref<3x4xf64>
 # GEN-DAG:     [[B:%.*]] = memref.alloc() : memref<4x2xf64>
 # GEN-DAG:     [[C:%.*]] = memref.alloc() : memref<3x2xf64>
 # GEN:         affine.for [[ROW:%.*]] = 0 to 3
 # GEN-NEXT:      affine.for [[COL:%.*]] = 0 to 2
+# GEN-NEXT:        affine.store [[ZERO]], [[C]]{{\[}}[[ROW]], [[COL]]] : memref<3x2xf64>
 # GEN-NEXT:        affine.for [[IDX:%.*]] = 0 to 4
 # GEN-NEXT:          [[A_ELEM:%.*]] = affine.load [[A]]{{\[}}[[ROW]], [[IDX]]] : memref<3x4xf64>
 # GEN-NEXT:          [[B_ELEM:%.*]] = affine.load [[B]]{{\[}}[[IDX]], [[COL]]] : memref<4x2xf64>
